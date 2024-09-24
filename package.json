@@ -1,0 +1,27 @@
+{
+  "name": "libapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "appp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon appp.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dharshanikaan/libapp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dharshanikaan/libapp/issues"
+  },
+  "homepage": "https://github.com/dharshanikaan/libapp#readme",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.3",
+    "sequelize": "^6.37.3"
+  }
+}
