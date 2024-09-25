@@ -1,52 +1,53 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../model/lib');
+
+let borrowedBooks = [];
+let referredBooks = [];
 
 // Add Booking
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
     const { title } = req.body;
     if (!title) {
         return res.status(400).json({ message: 'Book title is required.' });
     }
 
-    try {
-        const newBooking = await Booking.create({ title });
-        res.status(201).json(newBooking);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+    const book = {
+        title,
+        takenDate: new Date(),
+        returnDate: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+        fine: 0
+    };
+    
+    borrowedBooks.push(book);
+    res.status(201).json(book);
 });
 
-// Get all Bookings
-router.get('/', async (req, res) => {
-    try {
-        const bookings = await Booking.findAll();
-        res.json(bookings);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+// Get all Borrowed Books
+router.get('/borrowed', (req, res) => {
+    res.json(borrowedBooks);
+});
+
+// Get all Referred Books
+router.get('/referred', (req, res) => {
+    res.json(referredBooks);
 });
 
 // Return Booking
-router.post('/return/:id', async (req, res) => {
-    const { id } = req.params;
-    const { returnDate } = req.body;
+router.post('/return/:title', (req, res) => {
+    const { title } = req.params;
 
-    try {
-        const booking = await Booking.findByPk(id);
-        if (!booking || booking.isReturned) return res.status(404).send('Booking not found or already returned');
+    const index = borrowedBooks.findIndex(book => book.title === title);
+    if (index === -1) return res.status(404).json({ message: 'Booking not found.' });
 
-        const lateDays = Math.max(0, (new Date(returnDate) - new Date(booking.returnDate)) / (1000 * 60 * 60 * 24));
-        const fine = lateDays * 5; // Example fine rate: $5 per day
+    const booking = borrowedBooks[index];
+    const lateHours = Math.max(0, (new Date() - new Date(booking.returnDate)) / (1000 * 60 * 60));
+    const fine = lateHours > 0 ? lateHours * 5 : 0; // Example fine calculation
 
-        booking.isReturned = true;
-        booking.fine = fine;
-        await booking.save();
+    // Move to referred list
+    referredBooks.push({ ...booking, returnedOn: new Date() });
+    borrowedBooks.splice(index, 1); // Remove from borrowed list
 
-        res.json({ message: 'Booking returned', fine });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    res.json({ message: 'Booking returned', fine });
 });
 
 module.exports = router;

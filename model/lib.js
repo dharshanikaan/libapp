@@ -1,4 +1,3 @@
-
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
@@ -14,7 +13,6 @@ const Library = sequelize.define('Library', {
     returnDate: {
         type: Sequelize.DATE,
         allowNull: false,
-        // Remove the default value here
     },
     fine: {
         type: Sequelize.INTEGER,
@@ -23,12 +21,6 @@ const Library = sequelize.define('Library', {
     isReturned: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
-    },
-}, {
-    hooks: {
-        beforeCreate: (library) => {
-            library.returnDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days from now
-        },
     },
 });
 
