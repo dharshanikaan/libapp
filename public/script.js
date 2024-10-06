@@ -32,7 +32,7 @@ function addBorrowedBookToList(book) {
     listItem.textContent = `${book.title} - Taken on: ${new Date(book.takenDate).toLocaleString()} - Return by: ${new Date(book.returnDate).toLocaleString()}`;
 
     const fineDisplay = document.createElement('span');
-    fineDisplay.textContent = ` Fine: $0`;
+    fineDisplay.textContent = ` Fine: 0`;
     fineDisplay.style.marginLeft = '10px';
     listItem.appendChild(fineDisplay);
 
@@ -49,7 +49,7 @@ function addBorrowedBookToList(book) {
                 // Redirect to payment page if there's a fine
                 const payFine = confirm(`You have a fine of $${fine}. Would you like to pay?`);
                 if (payFine) {
-                    window.location.href = `/pay-fine?fine=${fine}`; // Implement this route as needed
+                    window.location.href = `/api/bookings/pay-fine?fine=${fine}&title=${encodeURIComponent(book.title)}`; // Include title in the URL
                 }
             } else {
                 alert('Book returned successfully without fine.');
