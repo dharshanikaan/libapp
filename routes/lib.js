@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const Library = require('../model/lib'); 
 
 let borrowedBooks = [];
 let referredBooks = [];
@@ -15,7 +16,7 @@ router.post('/', (req, res) => {
     const book = {
         title,
         takenDate: new Date(),
-        returnDate: new Date(Date.now() + 1 * 60 * 1000), // 5 minutes from now
+        returnDate: new Date(Date.now() + 1 * 60 * 1000),
         fine: 0
     };
 
@@ -23,12 +24,12 @@ router.post('/', (req, res) => {
     res.status(201).json(book);
 });
 
-// Get all Borrowed Books
+//  Borrowed Books
 router.get('/borrowed', (req, res) => {
     res.json(borrowedBooks);
 });
 
-// Get all Referred Books
+//  Referred Books
 router.get('/referred', (req, res) => {
     res.json(referredBooks);
 });
@@ -41,18 +42,26 @@ router.post('/return/:title', (req, res) => {
 
     const booking = borrowedBooks[index];
     const lateMinutes = Math.max(0, (new Date() - new Date(booking.returnDate)) / (1000 * 60));
-    const fine = lateMinutes > 0 ? lateMinutes * 10 : 0; // $10 fine per minute late
+    const fine = lateMinutes > 0 ? lateMinutes * 10 : 0;
 
-    // Move to referred list
-    referredBooks.push({ ...booking, returnedOn: new Date() });
-    borrowedBooks.splice(index, 1); // Remove from borrowed list
+    referredBooks.push({ ...booking, returnedOn: new Date(), fine });
+    borrowedBooks.splice(index, 1);
+
+    // Update the database
+    Library.create({
+        title: booking.title,
+        takenDate: booking.takenDate,
+        returnDate: booking.returnDate,
+        fine,
+        isReturned: true
+    }).catch(err => console.error('Failed to update database:', err));
 
     res.json({ message: 'Booking returned', fine });
 });
 
-// Payment route for fines
+//  for fines
 router.get('/pay-fine', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/pay-fine.html')); // Serve the pay-fine HTML page
+    res.sendFile(path.join(__dirname, '../views/pay-fine.html'));
 });
 
 // Referred Book
@@ -76,3 +85,6 @@ router.post('/referred', (req, res) => {
 });
 
 module.exports = router;
+
+
+

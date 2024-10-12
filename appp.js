@@ -3,21 +3,27 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bookingRoutes = require('./routes/lib');
+const sequelize = require('./util/database');
 
 const app = express();
 
-// Middleware
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files
+
+app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
+// routes
 app.use('/api/bookings', bookingRoutes);
 
-// Start server
-app.listen(3000, () => {
-    console.log(`Server is running on http://localhost:3000`);
-});
+//  with the database and start server
+sequelize.sync()
+    .then(() => {
+        app.listen(3000, () => {
+            console.log(`Server is running on http://localhost:3000`);
+        });
+    })
+    .catch(err => console.error('Unable to connect to the database:', err));

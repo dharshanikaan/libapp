@@ -4,42 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pay Fine</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Pay Fine</h1>
     <p id="fine-amount"></p>
-    <p id="message"></p> <!-- For displaying success or error messages -->
+    <p id="message"></p>
 
     <form id="payment-form">
         <button type="submit">Pay Fine</button>
     </form>
 
     <script>
-        // Extract the fine amount from the URL query string
         const urlParams = new URLSearchParams(window.location.search);
-        const fine = urlParams.get('fine'); // Get fine amount from URL
+        const fine = urlParams.get('fine');
 
-        // Check if fine is a valid number before displaying
         const fineAmount = parseFloat(fine);
         if (!isNaN(fineAmount)) {
-            document.getElementById('fine-amount').textContent = `Your fine amount is: $${fineAmount.toFixed(2)}`;
+            document.getElementById('fine-amount').textContent = `Your fine amount is: ${fineAmount.toFixed(2)}`;
         } else {
             document.getElementById('fine-amount').textContent = 'No valid fine amount specified.';
         }
 
         document.getElementById('payment-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // Simulate payment processing
-            const paymentSuccessful = true; // Change this logic as needed for real payment processing
+            const paymentSuccessful = true; // Simulate payment processing
 
             if (paymentSuccessful) {
                 document.getElementById('message').textContent = 'Payment successful! Thank you.';
+                const bookTitle = urlParams.get('title');
 
-                // Get the book title from the URL (if needed)
-                const bookTitle = urlParams.get('title'); // Assuming you're passing the book title in the URL too
-
-                // Add to referred book list
                 await fetch(`/api/bookings/referred`, {
                     method: 'POST',
                     headers: {
@@ -48,9 +42,8 @@
                     body: JSON.stringify({ title: bookTitle })
                 });
 
-                // Redirect or perform further actions as needed
                 setTimeout(() => {
-                    window.location.href = '/'; // Redirect to the homepage or another page after 3 seconds
+                    window.location.href = '/'; 
                 }, 3000);
             } else {
                 document.getElementById('message').textContent = 'Payment failed. Please try again.';

@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 document.getElementById('search-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const title = document.getElementById('search-title').value;
 
     const response = await fetch('/api/bookings', {
@@ -23,22 +22,26 @@ document.getElementById('search-form').addEventListener('submit', async (e) => {
         console.error('Error adding book');
     }
 
-    document.getElementById('search-title').value = ''; // Clear input field
+    document.getElementById('search-title').value = '';
 });
 
 function addBorrowedBookToList(book) {
     const borrowedList = document.getElementById('borrowed-list');
     const listItem = document.createElement('li');
-    listItem.textContent = `${book.title} - Taken on: ${new Date(book.takenDate).toLocaleString()} - Return by: ${new Date(book.returnDate).toLocaleString()}`;
 
-    const fineDisplay = document.createElement('span');
-    fineDisplay.textContent = ` Fine: 0`;
-    fineDisplay.style.marginLeft = '10px';
-    listItem.appendChild(fineDisplay);
+    // Create the content for the borrowed book
+    listItem.innerHTML = `
+        <strong>${book.title}</strong><br>
+        Taken on: ${new Date(book.takenDate).toLocaleString()}<br>
+        Return by: ${new Date(book.returnDate).toLocaleString()}<br>
+        Fine: 0
+    `;
 
-    const returnButton = document.createElement('button');
-    returnButton.textContent = 'Return';
-    returnButton.onclick = async () => {
+    // Create return button box
+    const returnBox = document.createElement('div');
+    returnBox.className = 'return-box';
+    returnBox.textContent = 'Return Book';
+    returnBox.onclick = async () => {
         const response = await fetch(`/api/bookings/return/${encodeURIComponent(book.title)}`, {
             method: 'POST',
         });
@@ -46,10 +49,9 @@ function addBorrowedBookToList(book) {
         if (response.ok) {
             const { fine } = await response.json();
             if (fine > 0) {
-                // Redirect to payment page if there's a fine
-                const payFine = confirm(`You have a fine of $${fine}. Would you like to pay?`);
+                const payFine = confirm(`You have a fine of ${fine}. Would you like to pay?`);
                 if (payFine) {
-                    window.location.href = `/api/bookings/pay-fine?fine=${fine}&title=${encodeURIComponent(book.title)}`; // Include title in the URL
+                    window.location.href = `/api/bookings/pay-fine?fine=${fine}&title=${encodeURIComponent(book.title)}`;
                 }
             } else {
                 alert('Book returned successfully without fine.');
@@ -60,7 +62,8 @@ function addBorrowedBookToList(book) {
             console.error('Error returning book');
         }
     };
-    listItem.appendChild(returnButton);
+
+    listItem.appendChild(returnBox);
     borrowedList.appendChild(listItem);
 }
 
