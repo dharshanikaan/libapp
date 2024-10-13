@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const bookingRoutes = require('./routes/lib');
+const libraryRoutes = require('./routes/lib'); 
 const sequelize = require('./util/database');
 
 const app = express();
@@ -16,10 +16,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// routes
-app.use('/api/bookings', bookingRoutes);
 
-//  with the database and start server
+app.use('/api/bookings', libraryRoutes); 
+
+// Database sync and server start
 sequelize.sync()
     .then(() => {
         app.listen(3000, () => {
